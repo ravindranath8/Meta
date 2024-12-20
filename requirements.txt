@@ -3,9 +3,9 @@ transformers
 torch
 bitsandbytes
 protobuf
-streamlit
-transformers
-torch
+
+
+
 numpy
 matplotlib
 streamlit==1.41.1
