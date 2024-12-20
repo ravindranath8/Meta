@@ -1,6 +1,6 @@
 import streamlit as st
 from transformers import AutoModelForCausalLM, AutoTokenizer
-import os
+import torch
 
 # Title and description
 st.title("meta-llama/Llama-3.2-1B Demo")
@@ -18,13 +18,16 @@ def load_model(token):
     if not token:
         st.error("Please provide a valid Hugging Face token!")
         st.stop()
+    
     model_name = "meta-llama/Llama-3.2-1B"  # Replace with the actual model identifier
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=token)
+    
+    # We use 'torch.float32' to avoid potential issues with float16 compatibility
     model = AutoModelForCausalLM.from_pretrained(
         model_name, 
         use_auth_token=token,
-        torch_dtype=torch.float16,  # Use float16 for memory efficiency
-        device_map="auto"          # Automatically map model to available devices
+        torch_dtype=torch.float32,  # Changed to float32 for better compatibility
+        device_map="auto"           # Automatically map model to available devices
     )
     return model, tokenizer
 
@@ -37,8 +40,15 @@ if st.button("Generate Response"):
     if prompt.strip():
         # Tokenize input
         inputs = tokenizer(prompt, return_tensors="pt")
+        
+        # Check for GPU/CPU device availability and move the model accordingly
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model.to(device)
+        
         # Generate response
-        outputs = model.generate(**inputs, max_length=200, num_return_sequences=1, do_sample=True)
+        with torch.no_grad():
+            outputs = model.generate(**inputs, max_length=200, num_return_sequences=1, do_sample=True)
+        
         # Decode and display the response
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
         st.success("Model Response:")
