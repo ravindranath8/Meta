@@ -2,4 +2,15 @@ streamlit
 transformers 
 torch
 bitsandbytes
-protobuf==3.20.3
+protobuf
+streamlit
+transformers
+torch
+numpy
+matplotlib
+streamlit==1.41.1
+transformers==4.47.1
+torch==2.5.1+cpu  # Adjust the version if you're using a GPU
+numpy
+matplotlib
+
