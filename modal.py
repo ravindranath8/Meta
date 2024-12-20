@@ -20,7 +20,12 @@ def load_model(token):
         st.stop()
     model_name = "meta-llama/Llama-3.2-1B"  # Replace with the actual model identifier
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=token)
-    model = AutoModelForCausalLM.from_pretrained(model_name, use_auth_token=token)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name, 
+        use_auth_token=token,
+        torch_dtype=torch.float16,  # Use float16 for memory efficiency
+        device_map="auto"          # Automatically map model to available devices
+    )
     return model, tokenizer
 
 if hf_token:
